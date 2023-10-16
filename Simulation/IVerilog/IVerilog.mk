@@ -1,0 +1,15 @@
+SIMULATOR_FLAGS = -W all -g2005-sv -I$(PROJECT_TESTBENCH_DIR) -I$(PROJECT_RTL_DIR)
+ifeq ($(VCD),1)
+SIMULATOR_FLAGS += -DVCD
+endif
+
+IVERILOG_OUTPUT := a.out
+
+sim-run:
+	iverilog $(SIMULATOR_FLAGS) $(VERILOG_SOURCES)
+	./$(IVERILOG_OUTPUT)
+
+sim-clean: gen-clean
+	@rm -f $(IVERILOG_OUTPUT)
+
+.PHONY: sim-run sim-clean
