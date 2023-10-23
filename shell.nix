@@ -14,6 +14,7 @@ pkgs.mkShell {
     gtkwave
     python3
     verible
-    black
+    yosys
+    nextpnr
   ];
 }

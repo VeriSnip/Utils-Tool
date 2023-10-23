@@ -8,3 +8,6 @@ PROJECT_RTL_DIR ?= $(PROJECT_BUILD_DIR)/RTL
 VERILOG_SOURCES := $(wildcard $(PROJECT_RTL_DIR)/*)
 
 include $(SIMULATION_DIR)/simulation.mk
+
+nix:
+	nix-shell $(MyUtils_DIR)/shell.nix
