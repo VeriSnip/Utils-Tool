@@ -6,10 +6,10 @@ endif
 IVERILOG_OUTPUT := a.out
 
 sim-run:
-	iverilog $(SIMULATOR_FLAGS) $(VERILOG_SOURCES)
+	iverilog $(SIMULATOR_FLAGS) $(VERILOG_SOURCES) $(SIMULATION_SOURCES)
 	./$(IVERILOG_OUTPUT)
 
-sim-clean: gen-clean
+sim-clean:
 	@rm -f $(IVERILOG_OUTPUT)
 
 .PHONY: sim-run sim-clean
