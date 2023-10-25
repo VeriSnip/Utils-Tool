@@ -9,12 +9,17 @@
 pkgs.mkShell {
   name = "MyShell";
   buildInputs = with pkgs; [
+    python3
+    # Verilog Simulation Tools
     verilog
     verilator
+    # Other Verilog Tools
     gtkwave
-    python3
     verible
+    # FPGA tools
     yosys
     nextpnr
+    trellis
+    icestorm
   ];
 }
