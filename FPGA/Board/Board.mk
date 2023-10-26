@@ -1,8 +1,15 @@
 BOARD_DIR ?= $(FPGA_DIR)/Board
 BOARD ?= IceSugar-pro
+PROGRAMMING_MODE ?= sram
+
+ifeq ($(PROGRAMMING_MODE), sram)
+OPENFPGALOADER_FLAGS = -m
+else
+OPENFPGALOADER_FLAGS = -f
+endif
 
 board-programming: $(PROJECT_NAME).bit
-	openFPGALoader -f -c cmsisdap --vid=0x1d50 --pid=0x602b $^
+	openFPGALoader $(OPENFPGALOADER_FLAGS) -c cmsisdap --vid=0x1d50 --pid=0x602b $^
 
 board-run: board-programming
 	@echo "Not implemented yet."
