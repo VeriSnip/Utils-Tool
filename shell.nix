@@ -1,15 +1,9 @@
-{ pkgs ? import (builtins.fetchTarball {
-  # Descriptive name to make the store path easier to identify
-  name = "nixos-22.11";
-  # Commit hash for nixos-22.11
-  url = "https://github.com/NixOS/nixpkgs/archive/refs/tags/22.11.tar.gz";
-  # Hash obtained using `nix-prefetch-url --unpack <url>`
-  sha256 = "11w3wn2yjhaa5pv20gbfbirvjq6i3m7pqrq2msf0g7cv44vijwgw";
-}) {}}:
+{ pkgs ? import <nixpkgs> {} }:
 pkgs.mkShell {
   name = "MyShell";
   buildInputs = with pkgs; [
     python3
+    picocom
     # Verilog Simulation Tools
     verilog
     verilator
@@ -21,5 +15,8 @@ pkgs.mkShell {
     nextpnr
     trellis
     icestorm
+    openfpgaloader
+    # FPGA debuger
+    openocd
   ];
 }
