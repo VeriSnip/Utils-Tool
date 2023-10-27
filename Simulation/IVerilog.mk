@@ -15,6 +15,6 @@ sim-run: $(IVERILOG_OUTPUT_DIR)
 	$(IVERILOG_OUTPUT)
 
 sim-clean:
-	@rm -rf $(IVERILOG_OUTPUT_DIR)
+	-rm -rf $(IVERILOG_OUTPUT_DIR)
 
 .PHONY: sim-run sim-clean

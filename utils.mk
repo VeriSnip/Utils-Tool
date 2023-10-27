@@ -15,7 +15,7 @@ help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  build          to create a directory with the built rtl code."
 
-clean-all: board-clean hardware-clean
+clean-all: sim-clean board-clean hardware-clean 
 
 .PHONY: help clean-all
 

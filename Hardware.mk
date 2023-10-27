@@ -12,6 +12,6 @@ hardware-build:
 	python $(VTBUILD) $(PROJECT_NAME) $(TESTBENCH_ARG) $(BOARD_ARG)
 
 hardware-clean:
-	python $(VTBUILD) --clean all
+	@python $(VTBUILD) --clean all
 
 .PHONY: hardware-build hardware-clean
