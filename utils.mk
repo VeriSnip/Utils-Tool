@@ -15,15 +15,10 @@ help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  build          to create a directory with the built rtl code."
 
-hardware-build:
-	python $(VTbuild_DIR)/VTbuild.py $(PROJECT_NAME)
-
-hardware-clean:
-	python $(VTbuild_DIR)/VTbuild.py --clean all
-
 clean-all: board-clean hardware-clean
 
-.PHONY: help clean-all hardware-build hardware-clean
+.PHONY: help clean-all
 
+include $(MyUtils_DIR)/Hardware.mk
 include $(SIMULATION_DIR)/Simulation.mk
 include $(BOARD_DIR)/Board.mk
