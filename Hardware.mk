@@ -1,15 +1,22 @@
 VTBUILD := $(VTbuild_DIR)/VTbuild.py
-
+VTBUILD_ARGS := 
 # Check if variable is defined
 ifdef TestBench
-    TESTBENCH_ARG := --TestBench $(TestBench)
+    VTBUILD_ARGS += --TestBench $(TestBench)
 endif
 ifdef Supported_Boards
-    BOARD_ARG := --Boards "$(Supported_Boards)"
+    VTBUILD_ARGS += --Boards "$(Supported_Boards)"
+endif
+ifdef QUIET 
+    VTBUILD_ARGS += --quiet
+endif
+ifdef DEBUG 
+    VTBUILD_ARGS += --debug
 endif
 
+
 hardware-build:
-	python $(VTBUILD) $(PROJECT_NAME) $(TESTBENCH_ARG) $(BOARD_ARG)
+	python $(VTBUILD) $(PROJECT_NAME) $(VTBUILD_ARGS)
 
 hardware-clean:
 	@python $(VTBUILD) --clean all
