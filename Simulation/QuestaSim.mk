@@ -1,7 +1,23 @@
-LICENSE_FILE=/home/pantunes/intelFPGA_lite/LR-127519_License.dat
+QUESTASIM_LICENSE ?= $(HOME)/intelFPGA_lite/LR-127519_License.dat
+QUESTASIM_SOURCES := $(VERILOG_SOURCES) $(SIMULATION_SOURCES)
+QUESTASIM_FLAGS := -quiet +incdir+$(PROJECT_TESTBENCH_DIR) +incdir+$(PROJECT_RTL_DIR)
+ifeq ($(VCD),1)
+    QUESTASIM_FLAGS += +define+VCD
+endif
 
-sim-run:
-	export LM_LICENSE_FILE=$(LICENSE_FILE)
-	vlib $(PROJECT_NAME)
-	vlog -quiet -work $(PROJECT_NAME) $(VERILOG_SOURCES) $(SIMULATION_SOURCES)
-	vsim -c $(PROJECT_NAME).$(PROJECT_NAME)_tb -do "run -all"
+ifdef TestBench
+    PROJECT_SIM_TOP := $(TestBench)
+else
+    PROJECT_SIM_TOP := $(PROJECT_NAME)_tb
+endif
+
+sim-run: sim-clean
+	export LM_LICENSE_FILE=$(QUESTASIM_LICENSE)
+	vlog $(QUESTASIM_FLAGS) $(QUESTASIM_SOURCES)
+	vsim -voptargs="+acc" -c $(PROJECT_SIM_TOP) -do "run -all"
+
+sim-clean:
+	-rm -f transcript *.vcd *.wlf
+	-rm -rf $(PROJECT_NAME)
+
+.PHONY: sim-run sim-clean
