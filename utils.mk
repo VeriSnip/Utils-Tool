@@ -6,7 +6,7 @@ PROJECT_DIR ?= $(CURDIR)
 PROJECT_BUILD_DIR ?= $(PROJECT_DIR)/build
 PROJECT_RTL_DIR ?= $(PROJECT_BUILD_DIR)/RTL
 
-VERILOG_SOURCES := $(wildcard $(PROJECT_RTL_DIR)/*)
+VERILOG_SOURCES := $(wildcard $(PROJECT_RTL_DIR)/*.v $(PROJECT_RTL_DIR)/*.sv)
 
 nix:
 	nix-shell $(MyUtils_DIR)/shell.nix

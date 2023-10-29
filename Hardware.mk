@@ -4,8 +4,8 @@ VTBUILD_ARGS :=
 ifdef TestBench
     VTBUILD_ARGS += --TestBench $(TestBench)
 endif
-ifdef Supported_Boards
-    VTBUILD_ARGS += --Boards "$(Supported_Boards)"
+ifdef Board_Modules
+    VTBUILD_ARGS += --Boards "$(Board_Modules)"
 endif
 ifdef QUIET 
     VTBUILD_ARGS += --quiet
