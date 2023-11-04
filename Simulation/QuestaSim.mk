@@ -11,8 +11,8 @@ else
     PROJECT_SIM_TOP := $(PROJECT_NAME)_tb
 endif
 
+sim-run: export LM_LICENSE_FILE=$(QUESTASIM_LICENSE)
 sim-run: sim-clean
-	export LM_LICENSE_FILE=$(QUESTASIM_LICENSE)
 	vlog $(QUESTASIM_FLAGS) $(QUESTASIM_SOURCES)
 	vsim -voptargs="+acc" -c $(PROJECT_SIM_TOP) -do "run -all"
 
