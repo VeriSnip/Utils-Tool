@@ -18,6 +18,6 @@ sim-run: sim-clean
 
 sim-clean:
 	-rm -f transcript *.vcd *.wlf
-	-rm -rf $(PROJECT_NAME)
+	-rm -rf work
 
 .PHONY: sim-run sim-clean
