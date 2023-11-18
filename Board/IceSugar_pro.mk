@@ -43,4 +43,4 @@ board-programming: $(PROJECT_BIT)
 board-clean:
 	-rm -rf $(OUTPUT_FPGA_DIR)
 
-.PHONY: board-programming board-run board-clean
+.PHONY: board-programming board-clean
