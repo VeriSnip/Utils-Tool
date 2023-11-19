@@ -6,7 +6,6 @@ INCLUDE_FILE := $(BOARD_DIR)/$(BOARD).mk
 
 board-connect:
 	picocom -b 115200 /dev/ttyACM0
-	@echo "Not implemented yet."
 
 ifeq ($(wildcard $(INCLUDE_FILE)),)
     $(error $(INCLUDE_FILE) does not exist. Please make sure it is available.)
