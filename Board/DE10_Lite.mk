@@ -19,14 +19,9 @@ else
 OPENFPGALOADER_FLAGS = -f
 endif
 
-# Rule to create the directory if it doesn't exist
-$(OUTPUT_FPGA_DIR):
-	@mkdir -p $(OUTPUT_FPGA_DIR)
-
 # fpga-bitstream
-board-build: $(OUTPUT_FPGA_DIR)
-	cd $(OUTPUT_FPGA_DIR) && \
-	quartus_sh -t $(PROJECT_TCL) $(PROJECT_NAME) "$(FPGA_SOURCES)" $(PROJECT_SDC) && \
+board-build: 
+	quartus_sh -t $(PROJECT_TCL) $(PROJECT_NAME) "$(FPGA_SOURCES)" $(PROJECT_FPGA_TOP) $(PROJECT_SDC) $(OUTPUT_FPGA_DIR)
 	quartus_sh --flow compile $(PROJECT_NAME)
 
 board-programming: $(PROJECT_SOF)
@@ -34,5 +29,7 @@ board-programming: $(PROJECT_SOF)
 
 board-clean:
 	-rm -rf $(OUTPUT_FPGA_DIR)
+	-rm -rf work
+	-rm -f *.qpf *.qsf
 
 .PHONY: board-programming board-clean
