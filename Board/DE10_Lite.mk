@@ -20,7 +20,7 @@ OPENFPGALOADER_FLAGS = -f
 endif
 
 # fpga-bitstream
-board-build: 
+$(PROJECT_SOF): 
 	quartus_sh -t $(PROJECT_TCL) $(PROJECT_NAME) "$(FPGA_SOURCES)" $(PROJECT_FPGA_TOP) $(PROJECT_SDC) $(OUTPUT_FPGA_DIR)
 	quartus_sh --flow compile $(PROJECT_NAME)
 
