@@ -28,8 +28,11 @@ board-programming: $(PROJECT_SOF)
 	openFPGALoader $(OPENFPGALOADER_FLAGS) -b de10lite $^
 
 board-clean:
-	-rm -rf $(OUTPUT_FPGA_DIR)
-	-rm -rf work
-	-rm -f *.qpf *.qsf
+	@echo "Cleaning $(BOARD) Makefile generated files."
+	-@rm -rf $(OUTPUT_FPGA_DIR)
+	-@rm -rf work
+	-@rm -rf incremental_db
+	-@rm -rf db
+	-@rm -f *.qpf *.qsf
 
 .PHONY: board-programming board-clean

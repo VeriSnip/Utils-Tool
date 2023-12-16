@@ -5,11 +5,7 @@ ifeq ($(VCD),1)
     QUESTASIM_FLAGS += +define+VCD
 endif
 
-ifdef TestBench
-    PROJECT_SIM_TOP := $(TestBench)
-else
-    PROJECT_SIM_TOP := $(PROJECT_NAME)_tb
-endif
+PROJECT_SIM_TOP ?= $(PROJECT_NAME)_tb
 
 sim-run: export LM_LICENSE_FILE=$(QUESTASIM_LICENSE)
 sim-run: sim-clean
@@ -17,7 +13,8 @@ sim-run: sim-clean
 	vsim -voptargs="+acc" -c $(PROJECT_SIM_TOP) -do "run -all"
 
 sim-clean:
-	-rm -f transcript *.vcd *.wlf
-	-rm -rf work
+	@echo "Cleaning $(SIMULATOR) Makefile generated files."
+	-@rm -f transcript *.vcd *.wlf
+	-@rm -rf work
 
 .PHONY: sim-run sim-clean

@@ -41,6 +41,7 @@ board-programming: $(PROJECT_BIT)
 	openFPGALoader $(OPENFPGALOADER_FLAGS) -c cmsisdap --vid=0x1d50 --pid=0x602b $^
 
 board-clean:
-	-rm -rf $(OUTPUT_FPGA_DIR)
+	@echo "Cleaning $(BOARD) Makefile generated files."
+	-@rm -rf $(OUTPUT_FPGA_DIR)
 
 .PHONY: board-programming board-clean

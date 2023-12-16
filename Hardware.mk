@@ -1,11 +1,11 @@
 VTBUILD := $(VTbuild_DIR)/VTbuild.py
 VTBUILD_ARGS := 
 # Check if variable is defined
-ifdef TestBench
-    VTBUILD_ARGS += --TestBench $(TestBench)
+ifdef PROJECT_SIM_TOP
+    VTBUILD_ARGS += --TestBench $(PROJECT_SIM_TOP)
 endif
-ifdef Board_Modules
-    VTBUILD_ARGS += --Boards "$(Board_Modules)"
+ifdef FPGA_TOP_MODULES
+    VTBUILD_ARGS += --Boards "$(FPGA_TOP_MODULES)"
 endif
 ifdef QUIET 
     VTBUILD_ARGS += --quiet

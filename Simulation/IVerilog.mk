@@ -15,7 +15,8 @@ sim-run: $(IVERILOG_OUTPUT_DIR)
 	$(IVERILOG_OUTPUT)
 
 sim-clean:
-	-rm -rf $(IVERILOG_OUTPUT_DIR)
-	-rm -f *.vcd
+	@echo "Cleaning $(SIMULATOR) Makefile generated files."
+	-@rm -rf $(IVERILOG_OUTPUT_DIR)
+	-@rm -f *.vcd
 
 .PHONY: sim-run sim-clean
