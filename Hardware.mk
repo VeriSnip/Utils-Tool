@@ -1,4 +1,4 @@
-VTBUILD := $(VTbuild_DIR)/VTbuild.py
+VTBUILD := $(VTbuild_DIR)/VTBuild.py
 VTBUILD_ARGS := 
 # Check if variable is defined
 ifdef PROJECT_SIM_TOP
