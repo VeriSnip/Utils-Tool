@@ -11,6 +11,7 @@ FPGA_SOURCES := $(wildcard $(PROJECT_FPGA_DIR)/*) $(VERILOG_SOURCES)
 
 OUTPUT_FPGA_DIR ?= $(PROJECT_DIR)/$(FPGA)
 PROJECT_SOF := $(OUTPUT_FPGA_DIR)/$(PROJECT_NAME).sof
+PROJECT_POF := $(OUTPUT_FPGA_DIR)/$(PROJECT_NAME).pof
 
 PROGRAMMING_MODE ?= sram
 ifeq ($(PROGRAMMING_MODE), sram)
@@ -23,9 +24,11 @@ endif
 $(PROJECT_SOF): 
 	quartus_sh -t $(PROJECT_TCL) $(PROJECT_NAME) "$(FPGA_SOURCES)" $(PROJECT_FPGA_TOP) $(PROJECT_SDC) $(OUTPUT_FPGA_DIR)
 	quartus_sh --flow compile $(PROJECT_NAME)
+	quartus_cpf  --option=bitstream_compression=off -c $(PROJECT_NAME).sof $(PROJECT_NAME).rbf
 
 board-programming: $(PROJECT_SOF)
-	openFPGALoader $(OPENFPGALOADER_FLAGS) -b de10lite $^
+	quartus_pgm -m jtag -c 1 -o "p;$(PROJECT_POF)"
+#	openFPGALoader $(OPENFPGALOADER_FLAGS) -b de10lite $^
 
 board-clean:
 	@echo "Cleaning $(BOARD) Makefile generated files."
@@ -33,6 +36,6 @@ board-clean:
 	-@rm -rf work
 	-@rm -rf incremental_db
 	-@rm -rf db
-	-@rm -f *.qpf *.qsf
+	-@rm -f myuart.*
 
 .PHONY: board-programming board-clean
