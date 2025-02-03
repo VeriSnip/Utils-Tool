@@ -8,10 +8,23 @@ XILINX_PATH="${XILINX_PATH:-/dev/null}"
 ALTERA_PATH="${ALTERA_PATH:-/dev/null}"
 DOCKERFILE_PATH="$(dirname "$0")/Dockerfile"
 
-# Build image if missing
-if ! podman image exists "$IMAGE_NAME"; then
+# Check if --clean argument was passed and remove images and containers
+if [[ "$1" == "--clean" ]]; then
+    echo "Cleaning up images and containers..."
+    podman rm -f "$CONTAINER_NAME"
+    podman rmi -f "$IMAGE_NAME"
+    exit 0
+fi
+
+# Check if --build argument was passed and execute build if so. Otherwise pull image from Docker Hub
+if [[ "$1" == "--build" ]]; then
     echo "Building image..."
-    podman build -t "$IMAGE_NAME" -f "$DOCKERFILE_PATH" .
+    podman manifest create "$IMAGE_NAME"
+    podman build --platform linux/amd64,linux/arm64 --manifest "localhost/$IMAGE_NAME" -f "$DOCKERFILE_PATH" .
+    #podman manifest push "localhost/$IMAGE_NAME":latest docker://docker.io/pedroantunes178/$IMAGE_NAME:latest
+else
+    echo "Pulling image from Docker Hub..."
+    podman pull docker.io/library/"$IMAGE_NAME"
 fi
 
 # Container management
