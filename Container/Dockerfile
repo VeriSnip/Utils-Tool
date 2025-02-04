@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
     automake \
     gperf \
     wget \
+    usbutils \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Verilator (latest stable)
@@ -46,22 +47,22 @@ RUN VERIBLE_VERSION=v0.0-3933-g0e3fe53a && \
 # Install Yosys
 RUN git clone --recurse-submodules https://github.com/YosysHQ/yosys.git && \
     cd yosys && \
-    make && \
+    make config-gcc && \
     make install && \
     cd .. && \
     rm -rf yosys
 
 # Install Project Trellis
-RUN git clone https://github.com/YosysHQ/prjtrellis && \
+RUN git clone --recursive https://github.com/YosysHQ/prjtrellis && \
     cd prjtrellis/libtrellis && \
-    cmake -DCMAKE_INSTALL_PREFIX=/usr/local . && \
+    cmake . && \
     make && \
     make install && \
     cd .. && \
     rm -rf prjtrellis
 
 # Install Project IceStorm
-RUN git clone https://github.com/YosysHQ/icestorm.git && \
+RUN git clone --recursive https://github.com/YosysHQ/icestorm.git && \
     cd icestorm && \
     make && \
     make install && \
@@ -69,12 +70,10 @@ RUN git clone https://github.com/YosysHQ/icestorm.git && \
     rm -rf icestorm
 
 # Install nextpnr
-RUN git clone https://github.com/YosysHQ/nextpnr && \
+RUN git clone --recursive https://github.com/YosysHQ/nextpnr && \
     cd nextpnr && \
-    cmake -DARCH="ecp5;ice40" \
-          -DTRELLIS_ROOT=/usr/local/share/trellis \
-          -DICE40_ROOT=/usr/local/share/icebox \
-          -DCMAKE_INSTALL_PREFIX=/usr/local . && \
+    mkdir -p build && cd build && \
+    cmake .. -DARCH="all" && \
     make && \
     make install && \
     cd .. && \
@@ -90,8 +89,9 @@ RUN which verilator && \
 
 # Configure USB access
 COPY 99-fpga.rules /etc/udev/rules.d/99-fpga.rules
-RUN udevadm control --reload-rules && \
-    udevadm trigger
+#RUN service udev start && \
+#    udevadm control --reload-rules && \
+#    udevadm trigger
 
 # Set environment variables
 ENV SandBox=/SandBox

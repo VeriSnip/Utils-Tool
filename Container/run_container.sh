@@ -15,7 +15,6 @@ if [[ "$1" == "--clean" ]]; then
     podman rmi -f "$IMAGE_NAME"
     exit 0
 fi
-
 # Check if --build argument was passed and execute build if so. Otherwise pull image from Docker Hub
 if [[ "$1" == "--build" ]]; then
     echo "Building image..."
@@ -23,20 +22,26 @@ if [[ "$1" == "--build" ]]; then
     podman build --platform linux/amd64,linux/arm64 --manifest "localhost/$IMAGE_NAME" -f "$DOCKERFILE_PATH" .
     #podman manifest push "localhost/$IMAGE_NAME":latest docker://docker.io/pedroantunes178/$IMAGE_NAME:latest
 else
-    echo "Pulling image from Docker Hub..."
-    podman pull docker.io/library/"$IMAGE_NAME"
+    if ! podman image exists "$IMAGE_NAME"; then
+        echo "Image does not exist locally. Pulling image from Docker Hub..."
+        podman pull docker.io/library/"$IMAGE_NAME"
+    else
+        echo "Image already exists locally."
+    fi
 fi
 
+#ls -lha /dev/tty* | grep usb
+#        --device /dev/tty.usb* \
+#        -v "$SANDBOX_DIR:/SandBox:Z" \
+#        -v "$XILINX_PATH:/opt/Xilinx:Z" \
+#        -v "$ALTERA_PATH:/opt/Altera:Z" \
+#        -e DISPLAY="$DISPLAY" \
+#        -v /tmp/.X11-unix:/tmp/.X11-unix:Z \
 # Container management
 if ! podman container exists "$CONTAINER_NAME"; then
     echo "Creating new container..."
     podman run -it --name "$CONTAINER_NAME" \
-        --device /dev/bus/usb \
         -v "$SANDBOX_DIR:/SandBox:Z" \
-        -v "$XILINX_PATH:/opt/Xilinx:Z" \
-        -v "$ALTERA_PATH:/opt/Altera:Z" \
-        -e DISPLAY="$DISPLAY" \
-        -v /tmp/.X11-unix:/tmp/.X11-unix:Z \
         --security-opt label=disable \
         --replace \
         "$IMAGE_NAME"
