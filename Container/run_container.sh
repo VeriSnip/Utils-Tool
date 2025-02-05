@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 # Color codes
-ORANGE='\033[0;33m'
 GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Configuration
@@ -17,6 +18,26 @@ VOLUME_ARGS=()
 BUILD_FLAG=false
 CLEAN_FLAG=false
 FORCE_RECREATE=false
+
+# Check and display vendor path status
+check_vendor_path() {
+    local vendor_name=$1
+    local env_var=$2
+    local path="${!env_var}"
+    
+    if [[ -n "$path" && -d "$path" ]]; then
+        echo -e "${GREEN}✓ $vendor_name path configured: $path${NC}"
+        return 0
+    else
+        echo -e "${ORANGE}⚠  $vendor_name path not configured or invalid!"
+        echo -e "   Set the $env_var environment variable to enable ${vendor_name} toolchain mounting${NC}"
+        return 1
+    fi
+}
+
+get_existing_mount() {
+    podman inspect "$CONTAINER_NAME" --format "{{range .Mounts}}{{if eq .Destination \"$1\"}}{{.Source}}{{end}}{{end}}" 2>/dev/null
+}
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -68,71 +89,63 @@ else
     fi
 fi
 
-# Check and display vendor path status
-check_vendor_path() {
-    local vendor_name=$1
-    local env_var=$2
-    local path="${!env_var}"
-    
-    if [[ -n "$path" && -d "$path" ]]; then
-        echo -e "${GREEN}✓ $vendor_name path configured: $path${NC}"
-        return 0
-    else
-        echo -e "${ORANGE}⚠  $vendor_name path not configured or invalid!"
-        echo -e "   Set the $env_var environment variable to enable ${vendor_name} toolchain mounting${NC}"
-        return 1
-    fi
-}
-
 echo -e "\n=== Toolchain Configuration ==="
 check_vendor_path "AMD/Xilinx" "XILINX_PATH"
 check_vendor_path "Altera/Intel" "ALTERA_PATH"
 echo -e "==============================\n"
-
 # Configure conditional volumes
 if [[ -n "$XILINX_PATH" && -d "$XILINX_PATH" ]]; then
     VOLUME_ARGS+=(-v "$XILINX_PATH:/opt/Xilinx:Z")
 fi
-
 if [[ -n "$ALTERA_PATH" && -d "$ALTERA_PATH" ]]; then
     VOLUME_ARGS+=(-v "$ALTERA_PATH:/opt/Altera:Z")
 fi
 
-# Container management
 if podman container exists "$CONTAINER_NAME"; then
-    # Check if SANDBOX_DIR has changed
-    OLD_SANDBOX=$(podman inspect "$CONTAINER_NAME" --format '{{range .Mounts}}{{if eq .Destination "/SandBox"}}{{.Source}}{{end}}{{end}}')
-    
-    if [[ "$OLD_SANDBOX" != "$SANDBOX_DIR" ]]; then
-        echo -e "${ORANGE}SANDBOX_DIR has changed from:\n$OLD_SANDBOX\nto:\n$SANDBOX_DIR${NC}"
-        
+    # Get existing configuration
+    OLD_SANDBOX=$(get_existing_mount "/SandBox")
+    OLD_XILINX=$(get_existing_mount "/opt/Xilinx")
+    OLD_ALTERA=$(get_existing_mount "/opt/Altera")
+
+    # Check for changes
+    # Check for changes
+    CHANGES=()
+    [[ "$OLD_SANDBOX" != "$SANDBOX_DIR" ]] && CHANGES+=("SANDBOX_DIR: $OLD_SANDBOX → $SANDBOX_DIR")
+    [[ "$XILINX_PATH" != "$OLD_XILINX" ]] && CHANGES+=("XILINX_PATH: ${OLD_XILINX:-<none>} → ${XILINX_PATH:-<none>}")
+    [[ "$ALTERA_PATH" != "$OLD_ALTERA" ]] && CHANGES+=("ALTERA_PATH: ${OLD_ALTERA:-<none>} → ${ALTERA_PATH:-<none>}")
+
+    # Handle detected changes
+    if [[ ${#CHANGES[@]} > 0 ]]; then
+        echo -e "\n${ORANGE}Configuration changes detected:${NC}"
+        for change in "${CHANGES[@]}"; do
+            echo -e "  ${ORANGE}• $change${NC}"
+        done
         if [[ "$FORCE_RECREATE" == true ]]; then
             echo "Forcing container recreation..."
             podman rm -f "$CONTAINER_NAME"
         else
-            read -p "Remove existing container to update SANDBOX_DIR? [y/N] " -n 1 -r
+            read -p "Apply changes by recreating container? [y/N] " -n 1 -r
             echo
             if [[ $REPLY =~ ^[Yy]$ ]]; then
                 podman rm -f "$CONTAINER_NAME"
             else
-                echo "Using existing SANDBOX_DIR: $OLD_SANDBOX"
+                echo "Using existing configuration."
             fi
         fi
     fi
 fi
 
 if ! podman container exists "$CONTAINER_NAME"; then
-    echo "Creating new container..."
+    echo -e "${CYAN}Creating new container...${NC}"
     podman run -it --name "$CONTAINER_NAME" \
         -v "$SANDBOX_DIR:/SandBox:Z" \
         "${VOLUME_ARGS[@]}" \
         "${DEVICE_ARGS[@]}" \
         --security-opt label=disable \
-        --replace \
         "$IMAGE_NAME"
 else
-    echo "Starting existing container..."
-    if [ "$(podman inspect -f '{{.State.Status}}' "$CONTAINER_NAME")" == "running" ]; then
+    echo -e "${CYAN}Starting existing container...${NC}"
+    if [[ "$(podman inspect -f '{{.State.Status}}' "$CONTAINER_NAME")" == "running" ]]; then
         echo "Container is already running. Attaching..."
         podman attach "$CONTAINER_NAME"
     else
