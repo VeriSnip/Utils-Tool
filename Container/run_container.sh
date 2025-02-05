@@ -1,47 +1,132 @@
 #!/usr/bin/env bash
 
+# Color codes
+ORANGE='\033[0;33m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
 # Configuration
 CONTAINER_NAME="fpga-dev-container"
 IMAGE_NAME="fpga-dev"
 SANDBOX_DIR="$(pwd)"
-XILINX_PATH="${XILINX_PATH:-/dev/null}"
-ALTERA_PATH="${ALTERA_PATH:-/dev/null}"
 DOCKERFILE_PATH="$(dirname "$0")/Dockerfile"
 
-# Check if --clean argument was passed and remove images and containers
-if [[ "$1" == "--clean" ]]; then
+# Initialize variables
+DEVICE_ARGS=()
+VOLUME_ARGS=()
+BUILD_FLAG=false
+CLEAN_FLAG=false
+FORCE_RECREATE=false
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --device)
+            DEVICE_ARGS+=("--device" "$2")
+            shift 2
+            ;;
+        --build)
+            CLEAN_FLAG=true
+            BUILD_FLAG=true
+            shift
+            ;;
+        --clean)
+            CLEAN_FLAG=true
+            shift
+            ;;
+        --force)
+            FORCE_RECREATE=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
+# Handle clean flag
+if [[ "$CLEAN_FLAG" == true ]]; then
     echo "Cleaning up images and containers..."
     podman rm -f "$CONTAINER_NAME"
     podman rmi -f "$IMAGE_NAME"
     exit 0
 fi
-# Check if --build argument was passed and execute build if so. Otherwise pull image from Docker Hub
-if [[ "$1" == "--build" ]]; then
+
+# Handle build/pull logic
+if [[ "$BUILD_FLAG" == true ]]; then
     echo "Building image..."
     podman manifest create "$IMAGE_NAME"
     podman build --platform linux/amd64,linux/arm64 --manifest "localhost/$IMAGE_NAME" -f "$DOCKERFILE_PATH" .
-    #podman manifest push "localhost/$IMAGE_NAME":latest docker://docker.io/pedroantunes178/$IMAGE_NAME:latest
 else
     if ! podman image exists "$IMAGE_NAME"; then
         echo "Image does not exist locally. Pulling image from Docker Hub..."
-        podman pull docker.io/library/"$IMAGE_NAME"
-    else
-        echo "Image already exists locally."
+        podman pull docker.io/library/"$IMAGE_NAME" || {
+            echo "Failed to pull image. Use --build to build locally."
+            exit 1
+        }
     fi
 fi
 
-#ls -lha /dev/tty* | grep usb
-#        --device /dev/tty.usb* \
-#        -v "$SANDBOX_DIR:/SandBox:Z" \
-#        -v "$XILINX_PATH:/opt/Xilinx:Z" \
-#        -v "$ALTERA_PATH:/opt/Altera:Z" \
-#        -e DISPLAY="$DISPLAY" \
-#        -v /tmp/.X11-unix:/tmp/.X11-unix:Z \
+# Check and display vendor path status
+check_vendor_path() {
+    local vendor_name=$1
+    local env_var=$2
+    local path="${!env_var}"
+    
+    if [[ -n "$path" && -d "$path" ]]; then
+        echo -e "${GREEN}✓ $vendor_name path configured: $path${NC}"
+        return 0
+    else
+        echo -e "${ORANGE}⚠  $vendor_name path not configured or invalid!"
+        echo -e "   Set the $env_var environment variable to enable ${vendor_name} toolchain mounting${NC}"
+        return 1
+    fi
+}
+
+echo -e "\n=== Toolchain Configuration ==="
+check_vendor_path "AMD/Xilinx" "XILINX_PATH"
+check_vendor_path "Altera/Intel" "ALTERA_PATH"
+echo -e "==============================\n"
+
+# Configure conditional volumes
+if [[ -n "$XILINX_PATH" && -d "$XILINX_PATH" ]]; then
+    VOLUME_ARGS+=(-v "$XILINX_PATH:/opt/Xilinx:Z")
+fi
+
+if [[ -n "$ALTERA_PATH" && -d "$ALTERA_PATH" ]]; then
+    VOLUME_ARGS+=(-v "$ALTERA_PATH:/opt/Altera:Z")
+fi
+
 # Container management
+if podman container exists "$CONTAINER_NAME"; then
+    # Check if SANDBOX_DIR has changed
+    OLD_SANDBOX=$(podman inspect "$CONTAINER_NAME" --format '{{range .Mounts}}{{if eq .Destination "/SandBox"}}{{.Source}}{{end}}{{end}}')
+    
+    if [[ "$OLD_SANDBOX" != "$SANDBOX_DIR" ]]; then
+        echo -e "${ORANGE}SANDBOX_DIR has changed from:\n$OLD_SANDBOX\nto:\n$SANDBOX_DIR${NC}"
+        
+        if [[ "$FORCE_RECREATE" == true ]]; then
+            echo "Forcing container recreation..."
+            podman rm -f "$CONTAINER_NAME"
+        else
+            read -p "Remove existing container to update SANDBOX_DIR? [y/N] " -n 1 -r
+            echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                podman rm -f "$CONTAINER_NAME"
+            else
+                echo "Using existing SANDBOX_DIR: $OLD_SANDBOX"
+            fi
+        fi
+    fi
+fi
+
 if ! podman container exists "$CONTAINER_NAME"; then
     echo "Creating new container..."
     podman run -it --name "$CONTAINER_NAME" \
         -v "$SANDBOX_DIR:/SandBox:Z" \
+        "${VOLUME_ARGS[@]}" \
+        "${DEVICE_ARGS[@]}" \
         --security-opt label=disable \
         --replace \
         "$IMAGE_NAME"
@@ -54,3 +139,9 @@ else
         podman start -ia "$CONTAINER_NAME"
     fi
 fi
+
+#ls -lha /dev/tty* | grep usb
+#        --device /dev/tty.usb* \
+#        -e DISPLAY="$DISPLAY" \
+#        -v /tmp/.X11-unix:/tmp/.X11-unix:Z \
+# Container management

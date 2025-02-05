@@ -1,5 +1,7 @@
 # Container Documentation
+Some documentation to help in the future.
 
+## Building image
 If you encounter the following error while building the image:
 
 ```
@@ -13,3 +15,8 @@ podman machine stop
 podman machine set --cpus 4 --memory 8196
 podman machine start
 ```
+
+## Pushing built image
+Don't forget to `podman login docker.io`.
+Do `podman manifest push "localhost/fpga-dev":latest docker://docker.io/pedroantunes178/fpga-dev:latest`.
+Note `fpga-dev` is the `$IMAGE_NAME`.

@@ -13,7 +13,7 @@ help:
 	@echo "  build          to create a directory with the built rtl code."
 
 container:
-	$(MyUtils_DIR)/Container/run_container.sh
+	@$(MyUtils_DIR)/Container/run_container.sh
 
 clean-all: sim-clean board-clean hardware-clean 
 
