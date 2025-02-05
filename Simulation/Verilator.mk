@@ -1,0 +1,23 @@
+VERILATOR_OUTPUT_DIR ?= $(PROJECT_DIR)/$(SIMULATOR)
+VERILATOR_OUTPUT := $(VERILATOR_OUTPUT_DIR)/V$(PROJECT_NAME)
+VERILATOR_SOURCES := $(VERILOG_SOURCES) $(SIMULATION_SOURCES)
+VERILATOR_SOURCES += --top-module $(PROJECT_NAME) $(PROJECT_NAME)_tb.cpp
+VERILATOR_FLAGS := -cc --exe --build -Wall -Wno-fatal +1800-2023ext+v
+VERILATOR_FLAGS += --Mdir $(VERILATOR_OUTPUT_DIR)
+VERILATOR_FLAGS += -I$(PROJECT_TESTBENCH_DIR) -I$(PROJECT_RTL_DIR)
+VERILATOR_FLAGS += --trace --timing
+
+# Rule to create the directory if it doesn't exist
+$(VERILATOR_OUTPUT_DIR):
+	@mkdir -p $(VERILATOR_OUTPUT_DIR)
+
+sim-run: $(VERILATOR_OUTPUT_DIR)
+	verilator $(VERILATOR_FLAGS) $(VERILATOR_SOURCES)
+	$(VERILATOR_OUTPUT)
+
+sim-clean:
+	@echo "Cleaning $(SIMULATOR) Makefile generated files."
+	-@rm -rf $(VERILATOR_OUTPUT_DIR)
+	-@rm -f *.vcd
+
+.PHONY: comp exec clean
