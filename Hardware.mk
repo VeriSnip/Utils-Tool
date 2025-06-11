@@ -1,4 +1,3 @@
-VTBUILD := $(VTbuild_DIR)/vt_build.py
 VTBUILD_ARGS := 
 # Check if variable is defined
 ifdef PROJECT_SIM_TOP
@@ -16,9 +15,9 @@ endif
 
 
 hardware-build:
-	python3 $(VTBUILD) $(PROJECT_NAME) $(VTBUILD_ARGS)
+	vt_build $(PROJECT_NAME) $(VTBUILD_ARGS)
 
 hardware-clean:
-	@python3 $(VTBUILD) --clean all
+	@vt_build --clean all
 
 .PHONY: hardware-build hardware-clean
