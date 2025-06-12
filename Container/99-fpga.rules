@@ -1,4 +1,0 @@
-# FPGA Devices
-SUBSYSTEM=="usb", ATTR{idVendor}=="0403", MODE="0666"  # FTDI
-SUBSYSTEM=="usb", ATTR{idVendor}=="21a9", MODE="0666"  # Xilinx
-SUBSYSTEM=="usb", ATTR{idVendor}=="09fb", MODE="0666"  # Altera/Intel
