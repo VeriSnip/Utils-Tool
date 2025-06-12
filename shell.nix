@@ -5,7 +5,7 @@ pkgs.mkShell {
     python3
     picocom
     # Verilog Simulation Tools
-    verilog
+    iverilog
     verilator
     # Other Verilog Tools
     gtkwave
