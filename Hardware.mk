@@ -13,6 +13,12 @@ ifdef DEBUG
     VSBUILD_ARGS += --debug
 endif
 
+lint:
+	verilator --lint-only --Wall --Wno-fatal --top-module $(PROJECT_NAME) $(VERILOG_SOURCES)
+	verible-verilog-lint $(VERILOG_SOURCES)
+
+synth_estimate:
+	yosys -p "read_verilog $(VERILOG_SOURCES); hierarchy -check -top $(PROJECT_NAME); synth; stat"
 
 hardware-build:
 	vs_build $(PROJECT_NAME) $(VSBUILD_ARGS)
@@ -20,4 +26,4 @@ hardware-build:
 hardware-clean:
 	@vs_build --clean all
 
-.PHONY: hardware-build hardware-clean
+.PHONY: lint synth_estimate hardware-build hardware-clean
