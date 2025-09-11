@@ -15,7 +15,8 @@ endif
 
 lint:
 	verilator --lint-only --Wall --Wno-fatal --top-module $(PROJECT_NAME) $(VERILOG_SOURCES)
-	verible-verilog-lint $(VERILOG_SOURCES)
+	verible-verilog-lint --rules=-always-comb $(VERILOG_SOURCES)
+#	slang -Wall -Werror -top $(PROJECT_NAME) $(VERILOG_SOURCES)
 
 synth_estimate:
 	yosys -p "read_verilog $(VERILOG_SOURCES); hierarchy -check -top $(PROJECT_NAME); synth; stat"

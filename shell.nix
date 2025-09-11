@@ -10,6 +10,7 @@ pkgs.mkShell {
     # Other Verilog Tools
     gtkwave
     verible
+    # sv-lang
     # FPGA tools
     yosys
     nextpnr
