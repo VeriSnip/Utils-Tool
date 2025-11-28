@@ -1,4 +1,4 @@
-VSBUILD_ARGS := 
+VSBUILD_ARGS ?= 
 # Check if variable is defined
 ifdef PROJECT_SIM_TOP
     VSBUILD_ARGS += --TestBench $(PROJECT_SIM_TOP)
