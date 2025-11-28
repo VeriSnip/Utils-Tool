@@ -21,7 +21,7 @@ lint:
 synth_estimate:
 	yosys -p "read_verilog $(VERILOG_SOURCES); hierarchy -check -top $(PROJECT_NAME); synth; stat"
 
-hardware-build:
+vs_build:
 	vs_build $(PROJECT_NAME) $(VSBUILD_ARGS)
 
 hardware-clean:
