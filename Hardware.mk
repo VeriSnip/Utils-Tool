@@ -24,7 +24,7 @@ synth_estimate:
 vs_build:
 	vs_build $(PROJECT_NAME) $(VSBUILD_ARGS)
 
-hardware-clean:
-	@vs_build --clean all
+vs_clean:
+	@vs_build --clean
 
 .PHONY: lint synth_estimate hardware-build hardware-clean
