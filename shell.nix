@@ -20,19 +20,18 @@ pkgs.mkShell {
     # FPGA debugger
     openocd
     # Python packages
-    (python3.withPackages (ps: with ps; [
-      pip
-    ]))
+    python3Packages.pip
+    python3Packages.virtualenv
   ];
   
   shellHook = ''
-    # Create a temporary directory for pip packages
-    export PIP_PREFIX=$(mktemp -d)
-    export PYTHONPATH="$PIP_PREFIX/lib/python3.12/site-packages:$PYTHONPATH"
-    export PATH="$PIP_PREFIX/bin:$PATH"
-    
+    echo Entering pure nix-shell...
+    export PYTHONPATH=
+    export PATH=$PWD/.venv/bin:$PATH
+    virtualenv .venv
+    source .venv/bin/activate    
     echo "Installing verisnip via pip..."
-    pip install --prefix=$PIP_PREFIX verisnip
+    pip install verisnip
     echo "Shell environment ready!"
   '';
 }
