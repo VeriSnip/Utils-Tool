@@ -12,10 +12,7 @@ help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  build          to create a directory with the built rtl code."
 
-container:
-	@$(MyUtils_DIR)/Container/run_container.sh
-
-clean-all: sim-clean board-clean hardware-clean 
+clean: sim-clean board-clean hardware-clean 
 
 .PHONY: help clean-all
 
