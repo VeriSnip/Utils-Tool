@@ -28,10 +28,16 @@ pkgs.mkShell {
     echo Entering pure nix-shell...
     export PYTHONPATH=
     export PATH=$PWD/.venv/bin:$PATH
-    virtualenv .venv
-    source .venv/bin/activate    
-    echo "Installing verisnip via pip..."
-    pip install verisnip
+    if [ -d .venv ]; then
+      echo "Existing .venv being used"
+      source .venv/bin/activate
+    else
+      echo "Creating .venv..."
+      virtualenv .venv
+      echo "Installing verisnip via pip..."
+      source .venv/bin/activate
+      pip install verisnip
+    fi
     echo "Shell environment ready!"
   '';
 }
