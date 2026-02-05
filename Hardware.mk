@@ -21,6 +21,11 @@ lint:
 synth_estimate:
 	yosys -p "read_verilog $(VERILOG_SOURCES); hierarchy -check -top $(PROJECT_NAME); synth; stat"
 
+# Vivado Out-of-Context (OOC) synthesis and implementation
+PROJECT_OOC_TCL ?= $(firstword $(wildcard $(shell find $(CURDIR) -type f -name $(PROJECT_NAME)_OOC.tcl)))
+vivado_ooc:
+	vivado -mode batch -source $(PROJECT_OOC_TCL) -tclargs $(PROJECT_NAME) $(VERILOG_SOURCES)
+
 vs_build:
 	vs_build $(PROJECT_NAME) $(VSBUILD_ARGS)
 
