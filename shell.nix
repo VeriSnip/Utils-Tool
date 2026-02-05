@@ -4,6 +4,7 @@ pkgs.mkShell {
   buildInputs = with pkgs; [
     python3
     picocom
+    git
     # Verilog Simulation Tools
     iverilog
     verilator
